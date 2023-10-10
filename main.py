@@ -5,7 +5,10 @@
 from datetime import datetime
 from typing import Union, Optional
 from enum import Enum
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import ValidationException
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
 
 users = [
@@ -127,6 +130,20 @@ class User(BaseModel):
     role: str
     name: str
     degree: Optional[list[Degree]] = None
+
+
+@App.app.exception_handler(ValidationException)
+async def validation_exception_handler(
+        request: Request,
+        exc: ValidationException):
+    """function for handling validation-related errors. returns an error to
+    the client that occurred NOT because of the client, but because of the
+    server. it is used if we trust the client and can show errors that occur
+    on the server."""
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"detail": exc.errors()})
+    )
 
 
 @App.app.get("/")
