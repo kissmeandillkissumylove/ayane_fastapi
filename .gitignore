@@ -3,3 +3,6 @@ venv
 __pycache__
 desktop.ini
 .env
+migrations/__pycache__
+migrations/README
+migrations/script.py.mako
